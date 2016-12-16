@@ -3,34 +3,14 @@
 """
 Plays a multiple files.
 
-Advances to next file every 3 seconds.
+Advances to next file every 3 seconds by default.
 
 This is to demonstrate the kind of interrupted playback that
 can happen in a networked client, without any networking :)
-"""
 
-# Bugs this demonstrates
-#
-# BUG 1: On a Pi using --enable-bcm pipeline state has to be set to NULL to advance
-#        instead of READY.   This means the screen flashes black.
-#
-#        # Doesn't work
-#        python-multi.py --enable-bcm rgba_pngs/*
-#
-#        # Works, but with black screen
-#        python-multi.py --enable-bcm --null-state rgba_pngs/*
-#
-# BUG 2: Advancing files too quickly seems to cause a black screen
-#
-#        python-multi.py --delay=250 rgba_pngs/*
-#
-# BUG 3: RGB pngs do not display (bugzilla #
-#
-#        python-multi.py rgb_pngs/*
-#
-# BUG 4: JPEGS do not display or display a glitched screen
-#
-#        python-multi.py jpegs/*
+
+See the README for info which bugs you can reproduce with this.
+"""
 
 import ctypes
 import argparse
