@@ -100,7 +100,7 @@ def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000):
                 sys.exit(0)        
         print("play %s" % fn)
         if use_null:
-            # BUG 1: with --enable-bcm this has to be NULL otherwise we never get to the next file.
+            # BUG 776091: with --enable-bcm this has to be NULL otherwise we never get to the next file.
             pipeline.set_state(Gst.State.NULL)
         else:
             pipeline.set_state(Gst.State.READY)
