@@ -42,6 +42,6 @@ Fixed Bugs:
 
 ~~776141: RGB pngs do not display: https://bugzilla.gnome.org/show_bug.cgi?id=776141~~
 
-       ~~python-multi.py rgb_pngs/*~~
+~~python-multi.py rgb_pngs/*~~
 
 
