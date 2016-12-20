@@ -133,7 +133,7 @@ def main():
         parser.print_help()
         sys.exit()
 
-    play_files(args.files, args.enable_bcm, args.loop)
+    play_files(args.files, args.enable_bcm, args.loop, args.use_null)
 
 
 if __name__=="__main__":
