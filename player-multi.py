@@ -30,7 +30,7 @@ def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000):
     :param files: files to play
     :param enable_bcm: if True then create a dispmanx (raspberry pi) window
     """
-    global file_iter, in_advance
+    global file_iter
     file_iter = files.__iter__()
 
     Gst.init()
@@ -80,13 +80,7 @@ def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000):
         bus.enable_sync_message_emission()
         bus.connect('sync-message::element', on_sync_message)
 
-    in_advance = False
     def advance_file(*args, **kwargs):
-        global in_advance
-        if in_advance:
-            print("Aaargh")
-            sys.exit(1)
-        in_advance = True
         global file_iter
         try:
             fn =  os.path.abspath(next(file_iter))
@@ -106,7 +100,6 @@ def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000):
 
         src.set_property('location', fn)
         pipeline.set_state(Gst.State.PLAYING)
-        in_advance = False
         return True
 
 
