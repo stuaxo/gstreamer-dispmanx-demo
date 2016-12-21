@@ -65,7 +65,7 @@ def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000):
         print("get_resolution: %sx%s", width, height)
 
         # Create a window slightly smaller than fullscreen
-        nativewindow = bcm.create_native_window(50, 50, width -50, height-50, alpha_opacity=0)
+        nativewindow = bcm.create_native_window(50, 50, width -100, height-100, alpha_opacity=0)
         win_handle = ctypes.addressof(nativewindow)
 
         def on_sync_message(bus, msg):
@@ -98,7 +98,7 @@ def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000):
                 pipeline.set_state(Gst.State.NULL)
                 print("Bye.")
                 sys.exit(0)        
-        print("play %s" % fn)
+        print("\n[play %s]" % fn)
         if use_null:
             # BUG 776091: with --enable-bcm this has to be NULL otherwise we never get to the next file.
             pipeline.set_state(Gst.State.NULL)
