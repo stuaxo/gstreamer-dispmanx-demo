@@ -95,7 +95,6 @@ def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000):
                 file_iter = files.__iter__()
                 fn =  os.path.abspath(next(file_iter))
             else:
-                pipeline.set_state(Gst.State.NULL)
                 print("Bye.")
                 sys.exit(0)        
         print("\n[play %s]" % fn)
