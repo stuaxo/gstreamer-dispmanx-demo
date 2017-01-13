@@ -23,22 +23,22 @@ Reproduce
 Note - without the patch on 776091, neither of these will work:
 
        # Doesn't work
-       python-multi.py --enable-bcm rgba_pngs/*
+       python slideshow.py --enable-bcm rgba_pngs/*
 
        # Works, but with black screen
-       python-multi.py --enable-bcm --null-state rgba_pngs/*
+       python slideshow.py --enable-bcm --null-state rgba_pngs/*
 
 Without the patch, if you play a video then it will freeze at the end.
 
 776167: Advancing files too quickly seems to cause a black screen
        https://bugzilla.gnome.org/show_bug.cgi?id=776167
 
-       python-multi.py --delay=250 rgba_pngs/*
+       python slideshow.py --delay=250 rgba_pngs/*
 
 776165: JPEGS do not display or display a glitched screen
        https://bugzilla.gnome.org/show_bug.cgi?id=776165
 
-       python-multi.py jpegs/*
+       python slideshow.py jpegs/*
 
 
 Fixed Bugs
@@ -46,6 +46,6 @@ Fixed Bugs
 
 ~~776141: RGB pngs do not display: https://bugzilla.gnome.org/show_bug.cgi?id=776141~~
 
-~~python-multi.py rgb_pngs/*~~
+~~python slideshow.py rgb_pngs/*~~
 
 
