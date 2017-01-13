@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Plays a multiple files.
+Slideshow to preview files.
 
 Advances to next file every 3 seconds by default.
 
@@ -32,6 +32,7 @@ def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000):
     """
     global file_iter
     file_iter = files.__iter__()
+    played = 0
 
     Gst.init()
     mainloop = GObject.MainLoop()
@@ -62,7 +63,7 @@ def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000):
         import bcm
 
         width, height = bcm.get_resolution()
-        print("get_resolution: %sx%s", width, height)
+        print("get_resolution: %sx%s" % (width, height))
 
         # Create a window slightly smaller than fullscreen
         nativewindow = bcm.create_native_window(50, 50, width -100, height-100, alpha_opacity=0)
@@ -90,16 +91,18 @@ def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000):
                 fn =  os.path.abspath(next(file_iter))
             else:
                 print("Bye.")
-                sys.exit(0)        
-        print("\n[play %s]" % fn)
+                sys.exit(0)
+        
+        print("\n[play %s] #%s" % (fn, played))
         if use_null:
-            # BUG 776091: with --enable-bcm this has to be NULL otherwise we never get to the next file.
+            # BUG 776091: with --enable-bcm the window will be destroyed, so you need to set to NULL to get a new one
             pipeline.set_state(Gst.State.NULL)
         else:
             pipeline.set_state(Gst.State.READY)
-
+        
         src.set_property('location', fn)
         pipeline.set_state(Gst.State.PLAYING)
+        played += 1
         return True
 
 
