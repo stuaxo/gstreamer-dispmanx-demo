@@ -102,7 +102,7 @@ def play_files(files, enable_bcm, loop=False, use_null=False, keep_win=False, de
             # BUG 776091: with --enable-bcm the window will be destroyed, so you need to set to NULL to get a new one
             pipeline.set_state(Gst.State.NULL)
         else:
-            if preserve_window and win_handle:
+            if keep_win and win_handle:
                 sink.set_window_handle(win_handle)
                 
             pipeline.set_state(Gst.State.READY)
