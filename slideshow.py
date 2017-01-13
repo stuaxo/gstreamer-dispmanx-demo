@@ -30,9 +30,9 @@ def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000):
     :param files: files to play
     :param enable_bcm: if True then create a dispmanx (raspberry pi) window
     """
-    global file_iter
+    global file_iter, play_count
     file_iter = files.__iter__()
-    played = 0
+    play_count = 0
 
     Gst.init()
     mainloop = GObject.MainLoop()
@@ -82,7 +82,7 @@ def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000):
         bus.connect('sync-message::element', on_sync_message)
 
     def advance_file(*args, **kwargs):
-        global file_iter
+        global file_iter, play_count
         try:
             fn =  os.path.abspath(next(file_iter))
         except StopIteration:
@@ -93,7 +93,7 @@ def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000):
                 print("Bye.")
                 sys.exit(0)
         
-        print("\n[play %s] #%s" % (fn, played))
+        print("\n[play %s] #%s" % (fn, play_count))
         if use_null:
             # BUG 776091: with --enable-bcm the window will be destroyed, so you need to set to NULL to get a new one
             pipeline.set_state(Gst.State.NULL)
@@ -102,7 +102,7 @@ def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000):
         
         src.set_property('location', fn)
         pipeline.set_state(Gst.State.PLAYING)
-        played += 1
+        play_count += 1
         return True
 
 
