@@ -14,8 +14,10 @@ See the README for info which bugs you can reproduce with this.
 
 import ctypes
 import argparse
+import logging
 import itertools
 import os
+import subprocess
 import sys
 
 import gi
@@ -26,16 +28,19 @@ gi.require_version('GstGL', '1.0')
 from gi.repository import GObject, Gst, GstGL
 
 
-def play_files(files, enable_bcm, loop=False, use_null=False, keep_win=False, delay=3000):
+def on_error(bus, msg):
+    sys.exit(1)
+
+
+def play_files(files, enable_bcm, loop=False, use_null=False, delay=3000, repeat=0):
     """
     :param files: files to play
     :param enable_bcm: if True then create a dispmanx (raspberry pi) window
-    :param keep_win: try and preserve window, by calling set_window_handle before next item
     """
     global file_iter, play_count
     
     play_count = 0
-    if loop:
+    if loop or repeat:
         file_iter = itertools.cycle(files)  # loop over files forever
     else:
         file_iter = files.__iter__()
@@ -62,14 +67,15 @@ def play_files(files, enable_bcm, loop=False, use_null=False, keep_win=False, de
 
     src.link(decode)
 
+    bus = pipeline.get_bus()
+    bus.add_signal_watch()
+    bus.connect('message::error', on_error)
+
     if enable_bcm:
-        # Raspberry pi only.
-        #
-        # Create a dispmanx element for gstreamer to render to and pass it to gstreamer
+        # Raspberry pi:  Create a dispmanx element for gstreamer to render to and pass it to gstreamer
         import bcm
 
         width, height = bcm.get_resolution()
-        print("get_resolution: %sx%s" % (width, height))
 
         # Create a window slightly smaller than fullscreen
         nativewindow = bcm.create_native_window(50, 50, width -100, height-100, alpha_opacity=0)
@@ -77,13 +83,10 @@ def play_files(files, enable_bcm, loop=False, use_null=False, keep_win=False, de
 
         def on_sync_message(bus, msg):
             if msg.get_structure().get_name() == 'prepare-window-handle':
-                print('prepare-window-handle')
                 _sink = msg.src
                 _sink.set_window_handle(win_handle)  # Needs recent Gstreamer
                 _sink.set_render_rectangle(0, 0, nativewindow.width, nativewindow.height)
 
-        bus = pipeline.get_bus()
-        bus.add_signal_watch()
         bus.enable_sync_message_emission()
         bus.connect('sync-message::element', on_sync_message)
     else:
@@ -91,25 +94,28 @@ def play_files(files, enable_bcm, loop=False, use_null=False, keep_win=False, de
 
     def play_next_file(*args, **kwargs):
         global file_iter, play_count
+        subprocess.run("sudo vcdbg reloc | grep free", shell=True)
         try:
             fn =  os.path.abspath(next(file_iter))
         except StopIteration:
             print("Bye.")
             sys.exit(0)
         
-        print("\n[play %s] #%s" % (fn, play_count))
+        print("%s: play %s #%s" % (__file__, fn, play_count))
         if use_null:
             # BUG 776091: with --enable-bcm the window will be destroyed, so you need to set to NULL to get a new one
             pipeline.set_state(Gst.State.NULL)
         else:
-            if keep_win and win_handle:
-                sink.set_window_handle(win_handle)
-                
             pipeline.set_state(Gst.State.READY)
+        pipeline.get_state(Gst.CLOCK_TIME_NONE)
         
         src.set_property('location', fn)
         pipeline.set_state(Gst.State.PLAYING)
         play_count += 1
+        
+        if repeat and play_count > repeat:
+            sys.exit(0)
+            return False
         return True
 
 
@@ -126,8 +132,8 @@ def main():
 
     parser.add_argument('--enable-bcm', action='store_true', dest='enable_bcm', help="Enable BCM and set_window_handle")
     parser.add_argument('--use-null', action='store_true', dest='use_null', help="Enable BCM and set_window_handle")
-    parser.add_argument('--keep-win', action='store_true', dest='keep_win', help="Enable BCM and set_window_handle")
-    parser.add_argument('--loop', action='store_true', dest='loop', help="Loop forever")
+    parser.add_argument('--loop', action='store_true', dest='loop', help="Loop playback")
+    parser.add_argument('--repeat', default=0, dest='repeat', help="Repeat playback N times.", type=int)
     parser.add_argument('--delay', default=3000, dest='delay', help="Delay before advancing", type=int)
     parser.add_argument('files', nargs='+')
     args = parser.parse_args()
